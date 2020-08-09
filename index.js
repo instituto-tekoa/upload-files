@@ -1,31 +1,62 @@
 const AWS = require('aws-sdk');
-const { promisify }  = require('util')
+const crypto = require('crypto');
+
+const CRYPTO_ALGORITHM = 'aes-256-cbc';
+
+if (!process.env.SECRET_IV) console.error('SECRET_IV not found on .env');
+if (!process.env.SECRET_KEY) console.error('SECRET_KEY not found on .env');
+
+const SECRET_IV = Buffer.from(process.env.SECRET_IV, 'hex');
+const SECRET_KEY = Buffer.from(process.env.SECRET_KEY, 'hex');
 
 class Uploader {
-    constructor (id, secret, bucket) {
+    constructor(id, secret, bucket) {
         this.id = id;
         this.secret = secret;
         this.bucket = bucket;
         this.s3 = new AWS.S3({
             accessKeyId: id,
-            secretAccessKey: secret
-        })
-    }    
+            secretAccessKey: secret,
+        });
+    }
 
-    async send (filename, buffer) {
+    async send(path, contentType, buffer) {
+        const encryptedFilename = this.encrypt(path);
+
         const params = {
             Bucket: this.bucket,
-            Key: filename,
+            Key: `${new Date().getFullYear()}/${encryptedFilename}`,
+            ContentType: contentType,
             Body: buffer,
-            ACL: 'public-read'
-        }
-        const uploadPromisified = promisify(this.s3.upload)                                
-        
-        try {                             
-             return await uploadPromisified(params)             
-        } catch (err) {
-            throw err
-        }                 
+            ACL: 'public-read',
+        };
+
+        const uploadPromise = this.s3.upload(params).promise();
+
+        return uploadPromise;
+    }
+
+    encrypt(text) {
+        const cipher = crypto.createCipheriv(
+            CRYPTO_ALGORITHM,
+            Buffer.from(SECRET_KEY),
+            SECRET_IV
+        );
+        let encrypted = cipher.update(text);
+        encrypted = Buffer.concat([encrypted, cipher.final()]);
+        return encrypted.toString('hex');
+    }
+
+    decrypt(text) {
+        const encryptedText = Buffer.from(text, 'hex');
+        const decipher = crypto.createDecipheriv(
+            CRYPTO_ALGORITHM,
+            Buffer.from(SECRET_KEY),
+            SECRET_IV
+        );
+        let decrypted = decipher.update(encryptedText);
+        decrypted = Buffer.concat([decrypted, decipher.final()]);
+        return decrypted.toString();
     }
 }
 
