@@ -5,6 +5,7 @@ const CRYPTO_ALGORITHM = 'aes-256-cbc';
 
 if (!process.env.SECRET_IV) console.error('SECRET_IV not found on .env');
 if (!process.env.SECRET_KEY) console.error('SECRET_KEY not found on .env');
+if (!process.env.REACT_APP_URL) console.error('REACT_APP_URL not found on.env');
 
 const SECRET_IV = Buffer.from(process.env.SECRET_IV, 'hex');
 const SECRET_KEY = Buffer.from(process.env.SECRET_KEY, 'hex');
@@ -23,9 +24,11 @@ class Uploader {
     async send(path, contentType, buffer) {
         const encryptedFilename = this.encrypt(path);
 
+        const prefix = process.env.REACT_APP_URL.includes('localhost')? "staging/": "";
+
         const params = {
             Bucket: this.bucket,
-            Key: `${new Date().getFullYear()}/${encryptedFilename}`,
+            Key: `${prefix}${new Date().getFullYear()}/${encryptedFilename}`,
             ContentType: contentType,
             Body: buffer,
             ACL: 'public-read',

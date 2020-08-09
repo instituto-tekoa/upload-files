@@ -1,6 +1,6 @@
 {
   "name": "upload-files",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Library to upload files",
   "main": "server.js",
   "dependencies": {
