@@ -1,4 +1,5 @@
 const AWS = require('aws-sdk');
+const { promisify }  = require('util')
 
 class Uploader {
     constructor (id, secret, bucket) {
@@ -18,9 +19,10 @@ class Uploader {
             Body: buffer,
             ACL: 'public-read'
         }
-
-        try {
-            await this.s3.upload(params).promise()                        
+        const uploadPromisified = promisify(this.s3.upload)                                
+        
+        try {                             
+             return await uploadPromisified(params)             
         } catch (err) {
             throw err
         }                 
