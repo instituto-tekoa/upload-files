@@ -3,6 +3,9 @@ const crypto = require('crypto');
 
 const CRYPTO_ALGORITHM = 'aes-256-cbc';
 
+if (!process.env.AWS_ACCESS_KEY) console.error('AWS_ACCESS_KEY not found on .env');
+if (!process.env.AWS_SECRET_KEY) console.error('AWS_SECRET_KEY not found on .env');
+if (!process.env.BUCKET) console.error('BUCKET not found on .env');
 if (!process.env.SECRET_IV) console.error('SECRET_IV not found on .env');
 if (!process.env.SECRET_KEY) console.error('SECRET_KEY not found on .env');
 if (!process.env.REACT_APP_URL) console.error('REACT_APP_URL not found on.env');
@@ -11,13 +14,13 @@ const SECRET_IV = Buffer.from(process.env.SECRET_IV, 'hex');
 const SECRET_KEY = Buffer.from(process.env.SECRET_KEY, 'hex');
 
 class Uploader {
-    constructor(id, secret, bucket) {
-        this.id = id;
-        this.secret = secret;
-        this.bucket = bucket;
+    constructor() {
+        this.id = process.env.AWS_ACCESS_KEY;
+        this.secret = process.env.AWS_SECRET_KEY;
+        this.bucket = process.env.BUCKET;
         this.s3 = new AWS.S3({
-            accessKeyId: id,
-            secretAccessKey: secret,
+            accessKeyId: this.id,
+            secretAccessKey: this.secret,
         });
     }
 
