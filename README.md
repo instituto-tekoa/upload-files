@@ -62,6 +62,15 @@ const Uploader = require('upload-files');
 router.post('/', upload.single("file"), async (req, res) => {      
   const uploader = new Uploader();
   
+  const maxSize = 3 * 1024 * 1024;
+
+  if (req.file.buffer.byteLength >= maxSize) {
+      return res.status(400).json({
+          err: `The maximum size of file is 3mb`,
+          msg: 'O tamanho máximo do arquivo é 3mb',
+      });
+  }
+  
   const { attribute } = req.body;
 
   const response = await uploader.send("NOME_DA_PASTA/NOME_DO_ARQUIVO", req.file.mimetype, req.file.buffer);
