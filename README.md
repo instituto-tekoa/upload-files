@@ -20,8 +20,8 @@ A classe <b> Uploader </b> precisa ser inicializada e algumas variáveis de ambi
 ```
 REACT_APP_URL= //local onde a aplicação está rodando
 
-SECRET_IV= //crypto
-SECRET_KEY= //crypto
+SECRET_IV= //crypto 32 chars hex use https://www.browserling.com/tools/random-hex
+SECRET_KEY= //crypto 64 chars hex use https://www.browserling.com/tools/random-hex
 
 AWS_ACCESS_KEY= //access key do S3
 AWS_SECRET_KEY= //secret key do S3
